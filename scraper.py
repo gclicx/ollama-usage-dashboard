@@ -109,9 +109,9 @@ def parse_settings(html: str) -> dict:
     # specific badge class (which changes with Tailwind utility churn).
     cu = html.find("Cloud usage")
     if cu != -1:
-        pm = re.search(r"\b(Free|Pro|Max|Team)\b", html[cu:cu + 600])
+        pm = re.search(r"\b(free|pro|max|team)\b", html[cu:cu + 600], re.IGNORECASE)
         if pm:
-            plan = pm.group(1)
+            plan = pm.group(1).capitalize()
 
     result = {
         "plan": plan,

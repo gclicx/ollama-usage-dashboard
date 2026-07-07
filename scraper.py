@@ -298,12 +298,17 @@ def normalize_cookie(raw: str) -> str:
         or "\tFALSE\t" in raw
     )
     if not looks_netscape:
-        # Bare session value (no '=', no newlines) — i.e. someone pasted just
-        # the copied cookie value without the "name=" prefix. Wrap it so the
-        # header is well-formed. A real Cookie header always contains '='.
-        if "=" not in raw and "\n" not in raw:
-            return f"__Secure-session={raw}"
-        return raw  # already a header string
+        # Distinguish a bare session value (one long opaque token, possibly
+        # with trailing base64 '=' padding) from a real Cookie header
+        # ("name=value" / "name=value; name2=value2"). The giveaway: in a real
+        # header the text before the FIRST '=' is a short cookie NAME; in a
+        # bare value the only '=' is trailing padding, so its "name" is the
+        # entire (huge) blob. Cookie names are never 64+ chars.
+        name_match = re.match(r"^([A-Za-z_][A-Za-z0-9_.\-]*)=", raw)
+        is_named_header = bool(name_match) and len(name_match.group(1)) < 64
+        if is_named_header or ("\n" in raw) or ("\t" in raw):
+            return raw  # real header (or something we shouldn't guess at)
+        return f"__Secure-session={raw}"  # bare value — wrap it
 
     pairs = []
     for line in raw.splitlines():

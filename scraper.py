@@ -298,6 +298,11 @@ def normalize_cookie(raw: str) -> str:
         or "\tFALSE\t" in raw
     )
     if not looks_netscape:
+        # Bare session value (no '=', no newlines) — i.e. someone pasted just
+        # the copied cookie value without the "name=" prefix. Wrap it so the
+        # header is well-formed. A real Cookie header always contains '='.
+        if "=" not in raw and "\n" not in raw:
+            return f"__Secure-session={raw}"
         return raw  # already a header string
 
     pairs = []

@@ -1,7 +1,7 @@
 {
   "plan": "Unknown",
   "session": {
-    "percent": 41.3,
+    "percent": 44.4,
     "resets_in": "2 hours",
     "models": [
       {
@@ -10,7 +10,7 @@
       },
       {
         "model": "glm-5.2",
-        "requests": 267
+        "requests": 277
       },
       {
         "model": "web search",
@@ -18,11 +18,11 @@
       }
     ],
     "resets_in_seconds": 7200,
-    "pace": 0.6883333333333334,
+    "pace": 0.74,
     "status": "good"
   },
   "weekly": {
-    "percent": 14.6,
+    "percent": 15.1,
     "resets_in": "5 days",
     "models": [
       {
@@ -35,7 +35,7 @@
       },
       {
         "model": "glm-5.2",
-        "requests": 472
+        "requests": 482
       },
       {
         "model": "web search",
@@ -43,8 +43,8 @@
       }
     ],
     "resets_in_seconds": 432000,
-    "pace": 0.511,
+    "pace": 0.5285,
     "status": "good"
   },
-  "updated_at": 1783431086
+  "updated_at": 1783431175
 }

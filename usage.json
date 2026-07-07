@@ -1,18 +1,4 @@
 {
-  "plan": "Unknown",
-  "session": {
-    "percent": 0,
-    "resets_in": "—",
-    "resets_in_seconds": null,
-    "pace": null,
-    "status": "good"
-  },
-  "weekly": {
-    "percent": 0,
-    "resets_in": "—",
-    "resets_in_seconds": null,
-    "pace": null,
-    "status": "good"
-  },
-  "updated_at": null
+  "error": "Invalid header value b'# Netscape HTTP Cookie File\\n# https://curl.haxx.se/rfc/cookie_spec.html\\n# This is a generated file! Do not edit.\\n\\nollama.com\\tFALSE\\t/\\tTRUE\\t1814378853\\taid\\t699d5f98-d4a1-403a-ba8e-210110ce4756\\nollama.com\\tFALSE\\t/\\tTRUE\\t1790619233\\t__Secure-session\\tYWdlLWVuY3J5cHRpb24ub3JnL3YxCi0-IFgyNTUxOSA3Nkx6MklJb2gyMVp1Yzd3Wk9ES0NFNEJ4SjdGbEc3VmZWWGZuRmRKd1JvCjZtQkRzcVlEVGtMK3JBYWVHbTk2OTBiOGVXcWNCVTlhRmsySUovVHZVNm8KLS0tIDI2dE9YaVVQN1ZCdGZhVHJ4SDRDMW1ncWxzS2VReXE0c3loVnl1V1ZlQzgKeAcDq4r9N5KktfxW84IINULD9g3nW5xW6RiNrUEKxe070xiQFAJJ1CgaRJnDk4mQWzraqgjX-F7B6SVR0osWPfNzV6ERyaL-n76W8cXqkD6r9x4ov6oMLf-fjfyIIyupZibXADwc7qg_R9TN-VB8nsXnS2wLdXxmFGr7Wc4tVrbNkO4aGPX3RZzjDg==\\n.ollama.com\\tTRUE\\t/\\tTRUE\\t1814379232\\tcf_clearance\\tUjnVFF8gFYDefEmVy0SRbZCJtpOLbm92rqebOfPxXdw-1782843231-1.2.1.1-Qo_RBU_Ej_VmLIVMZVbBiaHCQ6bfNfZCPwPtmjPgtNNNZZpU9flJY8eT6I3oSK.H3OdK_Loi7whbYcriA85QyeR_Zkkv47KXQAoNlP1SoIJ95s.nBc4z12HF6ueLCWCzd6M5OLcqjH5KLRoUaK2xejAVp1aKJntuHc69cwgw790LTGwhvtE6xpzF1w3knevm9AhpSKmxSUtZiq4EJCvi5aa.f3poOV4WSHzJeoKGhOAc9KuZj0RSul1xXN.v96kbHQOmOF3k9Cxoj8NpoWIfG5IbB1b754ZvPfkpoQdg2ToNX6b1QnrTRCZH9kTp82uGZWmFLWWnsFSUJUtJzbW8FoOf72KQKXlfwe.6ZPCX5N3MwODFx7UBQMbVRc_ESiSkg38kNaL24ZvIO8gtj.uiT6sTz2ardjLwYNHgVhEuVf7nm4xgg.Oe_PXaHMhlqq3E'",
+  "updated_at": 1783429245
 }

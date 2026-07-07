@@ -212,7 +212,52 @@ def update_history(path: str, data: dict) -> None:
     print(f"Wrote {path}: {len(history)} points (cap {HISTORY_MAX})")
 
 
+def normalize_cookie(raw: str) -> str:
+    """Coerce a cookie value into a valid HTTP ``Cookie:`` header.
+
+    Accepts either:
+      * a ready-made header string, e.g. ``name=value; name2=value2``
+      * a Netscape ``cookies.txt`` file (the format browser cookie-export
+        extensions emit, with a ``# Netscape HTTP Cookie File`` header and
+        tab-separated rows) — this is the common gotcha: people paste the whole
+        exported file into the secret, which then fails as an HTTP header.
+
+    For the Netscape form, every non-comment row's name/value is turned into a
+    ``name=value`` pair. Lines prefixed with ``#HttpOnly_`` are real cookie rows
+    (the ``#`` is a marker, not a comment) and are kept.
+    """
+    raw = (raw or "").strip()
+    if not raw:
+        return ""
+
+    looks_netscape = (
+        "# Netscape" in raw
+        or raw.startswith("#HttpOnly_")
+        or "\tTRUE\t" in raw
+        or "\tFALSE\t" in raw
+    )
+    if not looks_netscape:
+        return raw  # already a header string
+
+    pairs = []
+    for line in raw.splitlines():
+        if not line:
+            continue
+        if line.startswith("#HttpOnly_"):
+            line = line[len("#HttpOnly_"):]
+        elif line.startswith("#"):
+            continue
+        parts = line.split("\t")
+        if len(parts) < 7:
+            continue
+        name, value = parts[5], parts[6]
+        if name:
+            pairs.append(f"{name}={value}")
+    return "; ".join(pairs)
+
+
 def fetch_settings(cookie: str) -> str:
+    cookie = normalize_cookie(cookie)
     req = urllib.request.Request(
         SETTINGS_URL,
         headers={
@@ -233,6 +278,15 @@ def main():
     if not cookie:
         print("OLLAMA_CLOUD_COOKIE env var not set", file=sys.stderr)
         sys.exit(1)
+
+    header = normalize_cookie(cookie)
+    if not header or "__Secure-session" not in header:
+        print(
+            "OLLAMA_CLOUD_COOKIE didn't yield a usable Cookie header "
+            "(no __Secure-session found). If you pasted a cookies.txt export, "
+            "make sure it includes the __Secure-session row.",
+            file=sys.stderr,
+        )
 
     try:
         data = parse_settings(fetch_settings(cookie))

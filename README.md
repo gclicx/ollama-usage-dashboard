@@ -33,13 +33,19 @@ GitHub Pages renders it. Viewers never see your cookie — only the numbers.
 ## Setup (~3 minutes)
 
 1. **Fork / clone** this repo to your GitHub account.
-2. **Get your session cookie:**
-   - Open <https://ollama.com/settings> in your browser (be signed in).
-   - Open DevTools → **Application** → **Cookies** → `https://ollama.com`.
-   - Find `__Secure-session` and copy its **Value**.
-   - Set the secret as `OLLAMA_CLOUD_COOKIE=__Secure-session=<that value>`
-     (you can include other cookies too, semicolon-separated, exactly as the
-     browser sends the `Cookie:` header).
+2. **Get your session cookie** — either of these works:
+   - **Plain header (recommended):** Open <https://ollama.com/settings>
+     (signed in), DevTools → **Application** → **Cookies** → `https://ollama.com`,
+     find `__Secure-session` and copy its **Value**. Set the secret to
+     `__Secure-session=<that value>` (you can include other cookies too,
+     semicolon-separated, as the browser sends the `Cookie:` header).
+   - **`cookies.txt` export:** If you use a browser cookie-export extension, you
+     can paste the **entire exported `cookies.txt` file** (the one with the
+     `# Netscape HTTP Cookie File` header and tab-separated rows) as the secret
+     value. The scraper detects this format and converts it to a `Cookie:`
+     header automatically — just make sure the file includes the
+     `__Secure-session` row. (Including `cf_clearance` too helps with
+     Cloudflare.)
 3. **Add the repo secret:** repo → **Settings** → **Secrets and variables** →
    **Actions** → **New repository secret**. Name: `OLLAMA_CLOUD_COOKIE`,
    Value: the string from step 2.

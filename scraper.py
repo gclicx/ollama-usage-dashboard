@@ -104,14 +104,14 @@ def parse_settings(html: str) -> dict:
     could be parsed (likely an expired cookie or a markup change).
     """
     plan = "Unknown"
-    plan_match = re.search(
-        r'<span[^>]*class="[^"]*(?:inline-flex|rounded|badge)[^"]*"[^>]*>'
-        r"\s*(Pro|Max|Free)\s*</span>",
-        html,
-        re.IGNORECASE,
-    )
-    if plan_match:
-        plan = plan_match.group(1).strip()
+    # The plan badge sits right after the "Cloud usage" heading. Searching a
+    # short window after that heading is far more robust than matching a
+    # specific badge class (which changes with Tailwind utility churn).
+    cu = html.find("Cloud usage")
+    if cu != -1:
+        pm = re.search(r"\b(Free|Pro|Max|Team)\b", html[cu:cu + 600])
+        if pm:
+            plan = pm.group(1)
 
     result = {
         "plan": plan,
@@ -139,12 +139,15 @@ def parse_settings(html: str) -> dict:
     result["weekly"]["percent"] = _find_percent("Weekly")
 
     # Reset timers — "Resets in ...". The first belongs to session, the second
-    # to weekly (matches the page order).
+    # to weekly (matches the page order). Strip a trailing period for display.
+    def _clean_reset(raw):
+        return raw.strip().rstrip(".").strip()
+
     resets = re.findall(r"Resets?\s+in\s+([^<]+)", html)
     if len(resets) >= 1:
-        result["session"]["resets_in"] = resets[0].strip()
+        result["session"]["resets_in"] = _clean_reset(resets[0])
     if len(resets) >= 2:
-        result["weekly"]["resets_in"] = resets[1].strip()
+        result["weekly"]["resets_in"] = _clean_reset(resets[1])
 
     # Per-model request counts: data-model="..." data-requests="N". Session
     # models appear before the "Weekly usage" heading, weekly models after.

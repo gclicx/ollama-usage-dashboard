@@ -172,13 +172,71 @@ def parse_settings(html: str) -> dict:
         win["pace"] = pace
         win["status"] = _status_for_pace(pace) or _status_for_percent(pct)
 
-    if not result["session"] and not result["weekly"]:
-        raise RuntimeError(
-            "Could not parse usage data from ollama.com/settings. The page "
-            "layout may have changed, or the cookie is invalid/expired."
+    got_data = any(
+        result[k].get("percent") is not None or result[k].get("models")
+        for k in ("session", "weekly")
+    )
+    if not got_data:
+        raise ParseError(
+            "No session/weekly usage found on ollama.com/settings. The page "
+            "layout may have changed, or the cookie redirected to sign-in."
         )
 
     return result
+
+
+class ParseError(RuntimeError):
+    """Raised when the page was fetched but no usage values could be extracted."""
+
+
+def _redact(text: str) -> str:
+    """Strip obviously personal/opaque strings before exposing HTML snippets."""
+    text = re.sub(r"[\w.+-]+@[\w.-]+\.\w{2,}", "[email]", text)
+    # long base64-ish blobs (JWTs, session values, opaque tokens)
+    text = re.sub(r"[A-Za-z0-9_-]{40,}", "[token]", text)
+    return text
+
+
+def debug_html(html: str, width: int = 220, max_hits: int = 4) -> str:
+    """Return redacted snippets around usage-related markers, for diagnosing
+    markup changes. Safe to commit (emails/tokens redacted) and to paste.
+
+    Falls back to a redacted slice of the body if none of the expected markers
+    are present — that happens when the fetch landed on a Cloudflare challenge,
+    a sign-in redirect, or a client-rendered SPA shell, and the slice tells us
+    which.
+    """
+    markers = [
+        "Session usage", "Weekly usage", "Cloud usage",
+        "aria-label", "data-model", "data-requests", "data-time",
+        "Resets in", "% used", "usage", "session", "weekly",
+        "percent", "reset", "limit", "quota", "plan",
+        "__NEXT_DATA__", "self.__next_f", "application/json",
+    ]
+    out, total = [], 0
+    for marker in markers:
+        start, hits = 0, 0
+        while total < 24:
+            idx = html.lower().find(marker.lower(), start)
+            if idx < 0 or hits >= max_hits:
+                break
+            a = max(0, idx - width // 2)
+            b = min(len(html), idx + width // 2)
+            out.append(f"…{_redact(html[a:b].replace(chr(10), ' '))}…")
+            start = idx + 1
+            hits += 1
+            total += 1
+    if out:
+        return "\n".join(out)
+
+    # No markers at all — show a redacted slice of the body so we can tell
+    # whether this is a Cloudflare/Sign-in/SPA page.
+    body = re.sub(r"<script[\s\S]*?</script>", "[script]", html)
+    body = re.sub(r"<[^>]+>", " ", body)
+    body = re.sub(r"\s+", " ", body).strip()
+    if not body:
+        return "(empty body — likely a Cloudflare challenge or empty shell)"
+    return "NO MARKERS — body slice:\n" + _redact(body[:2500])
 
 
 def update_history(path: str, data: dict) -> None:
@@ -288,17 +346,36 @@ def main():
             file=sys.stderr,
         )
 
+    # 1) Fetch the page. A failure here is usually a bad/expired cookie or a
+    #    network/Cloudflare block — keep the last good usage.json up rather than
+    #    blanking the dashboard.
     try:
-        data = parse_settings(fetch_settings(cookie))
-    except Exception as exc:  # surface a structured error to the page
+        html = fetch_settings(cookie)
+    except Exception as exc:
+        data = {"error": f"fetch failed: {exc}", "updated_at": int(time.time())}
+        with open(out_path, "w") as f:
+            json.dump(data, f, indent=2)
+        print(f"Fetch failed: {exc}", file=sys.stderr)
+        sys.exit(0)
+
+    # 2) Parse. A failure here means the cookie worked but the markup doesn't
+    #    match — capture redacted snippets so we can fix the regex from the
+    #    committed usage.json (or stderr with OLLAMA_DEBUG=1).
+    try:
+        data = parse_settings(html)
+    except ParseError as exc:
         data = {
             "error": str(exc),
+            "debug": debug_html(html),
             "updated_at": int(time.time()),
         }
         with open(out_path, "w") as f:
             json.dump(data, f, indent=2)
-        print(f"Scrape failed: {exc}", file=sys.stderr)
-        sys.exit(0)  # don't fail the workflow — keep the last good page up
+        print(f"Parse failed: {exc}\n{debug_html(html)}", file=sys.stderr)
+        sys.exit(0)
+
+    if os.getenv("OLLAMA_DEBUG"):
+        print(debug_html(html), file=sys.stderr)
 
     data["updated_at"] = int(time.time())
     with open(out_path, "w") as f:

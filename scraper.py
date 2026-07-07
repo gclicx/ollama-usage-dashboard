@@ -390,6 +390,13 @@ def main():
     if os.getenv("OLLAMA_DEBUG"):
         print(debug_html(html), file=sys.stderr)
 
+    # Plan badge didn't match — print the real region (run log only, not public)
+    # so the regex can be fixed without guessing.
+    if data.get("plan") == "Unknown":
+        cu = html.find("Cloud usage")
+        region = html[cu:cu + 500].replace("\n", " ") if cu != -1 else "(no 'Cloud usage')"
+        print(f"PLAN UNKNOWN — region: {_redact(region)}", file=sys.stderr)
+
     data["updated_at"] = int(time.time())
     with open(out_path, "w") as f:
         json.dump(data, f, indent=2)

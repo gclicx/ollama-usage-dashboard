@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ollama Cloud Usage</title>
+<meta name="description" content="Live Ollama Cloud session and weekly usage, published read-only.">
+<style>
+  /* Palette = validated reference instance (dataviz skill). Roles only below. */
+  :root {
+    --surface-1: #fcfcfb;
+    --plane:     #f9f9f7;
+    --ink:       #0b0b0b;
+    --ink-2:     #52514e;
+    --muted:     #898781;
+    --grid:      #e1e0d9;
+    --base:      #c3c2b7;
+    --border:    rgba(11,11,11,0.10);
+
+    --series-1:  #2a78d6;   /* meter fill (sequential blue, step 450) */
+    --good:      #0ca30c;
+    --warning:   #fab219;
+    --serious:   #ec835a;
+    --critical:  #d03b3b;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --surface-1: #1a1a19;
+      --plane:     #0d0d0d;
+      --ink:       #ffffff;
+      --ink-2:     #c3c2b7;
+      --muted:     #898781;
+      --grid:      #2c2c2a;
+      --base:      #383835;
+      --border:    rgba(255,255,255,0.10);
+      --series-1:  #3987e5;
+    }
+  }
+  /* Status fill overrides per meter; status colors are the same in both modes. */
+  [data-status="good"]     { --fill: var(--good); }
+  [data-status="warning"]  { --fill: var(--warning); }
+  [data-status="serious"]  { --fill: var(--serious); }
+  [data-status="critical"] { --fill: var(--critical); }
+
+  * { box-sizing: border-box; }
+  html { color-scheme: light dark; }
+  body {
+    margin: 0;
+    background: var(--plane);
+    color: var(--ink);
+    font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 40px 20px 64px; }
+
+  header.page { margin-bottom: 28px; }
+  .eyebrow {
+    color: var(--muted); font-size: 12px; letter-spacing: .04em;
+    text-transform: uppercase; margin: 0 0 6px;
+  }
+  h1 { font-size: 26px; margin: 0 0 10px; font-weight: 650; }
+  .plan-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .plan {
+    display: inline-flex; align-items: center; gap: 6px;
+    border: 1px solid var(--border); border-radius: 999px;
+    padding: 3px 11px; font-size: 13px; font-weight: 600;
+    background: var(--surface-1);
+  }
+  .plan .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--series-1); }
+  .updated { color: var(--muted); font-size: 13px; }
+
+  .tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 620px) { .tiles { grid-template-columns: 1fr; } }
+
+  .tile {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px;
+  }
+  .tile-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 14px; }
+  .tile-label { font-size: 13px; font-weight: 600; color: var(--ink-2); }
+  .tile-window { font-size: 12px; color: var(--muted); }
+
+  .figure { display: flex; align-items: baseline; gap: 4px; margin-bottom: 14px; }
+  .figure .num { font-size: 40px; font-weight: 700; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+  .figure .pct { font-size: 18px; color: var(--ink-2); }
+  .figure .pace { margin-left: auto; font-size: 12px; color: var(--muted); }
+  .pace b { color: var(--ink-2); font-weight: 600; }
+
+  /* Meter: 2px surface ring on overlapping fill, 4px rounded data-ends, baseline anchor. */
+  .meter {
+    height: 12px; border-radius: 999px; background: var(--grid);
+    overflow: hidden; position: relative; border: 1px solid var(--border);
+  }
+  .meter > i {
+    display: block; height: 100%; border-radius: 999px;
+    background: var(--fill, var(--series-1));
+    transition: width .4s ease;
+  }
+  .meta { margin: 12px 0 0; color: var(--ink-2); font-size: 13px; }
+  .meta .reset { font-variant-numeric: tabular-nums; }
+  .status-chip {
+    display: inline-flex; align-items: center; gap: 6px; margin-top: 12px;
+    font-size: 12px; font-weight: 600; color: var(--ink-2);
+  }
+  .status-chip .sw { width: 9px; height: 9px; border-radius: 2px; background: var(--fill, var(--series-1)); }
+
+  .models { margin: 16px 0 0; }
+  .models h3 { font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin: 0 0 8px; font-weight: 600; }
+  table.models { width: 100%; border-collapse: collapse; font-size: 13px; }
+  table.models th, table.models td { text-align: left; padding: 6px 0; border-bottom: 1px solid var(--grid); }
+  table.models th { color: var(--muted); font-weight: 600; }
+  table.models td.r { text-align: right; font-variant-numeric: tabular-nums; }
+  .bar-cell { width: 45%; }
+  .bar-cell .mini { height: 6px; border-radius: 999px; background: var(--grid); overflow: hidden; }
+  .bar-cell .mini > i { display: block; height: 100%; background: var(--series-1); }
+
+  .empty { color: var(--muted); font-style: italic; font-size: 13px; }
+
+  footer.page { margin-top: 36px; color: var(--muted); font-size: 12.5px; line-height: 1.6; }
+  footer.page a { color: var(--ink-2); }
+
+  .skel .figure .num, .skel .meter > i { background: var(--grid); color: transparent; }
+  [hidden] { display: none !important; }
+
+  @media (prefers-reduced-motion: reduce) { .meter > i { transition: none; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="page">
+    <p class="eyebrow">Ollama Cloud</p>
+    <h1>Usage</h1>
+    <div class="plan-row">
+      <span class="plan"><span class="dot"></span><span id="plan">—</span> plan</span>
+      <span class="updated" id="updated">loading…</span>
+    </div>
+  </header>
+
+  <main>
+    <div class="tiles">
+      <section class="tile skel" id="session" data-status="good" aria-labelledby="s-label">
+        <div class="tile-head">
+          <span class="tile-label" id="s-label">Session</span>
+          <span class="tile-window">resets every 5h</span>
+        </div>
+        <div class="figure">
+          <span class="num" id="s-num">—</span><span class="pct">%</span>
+          <span class="pace" id="s-pace" hidden></span>
+        </div>
+        <div class="meter" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Session usage">
+          <i id="s-bar" style="width:0%"></i>
+        </div>
+        <p class="meta">Resets in <span class="reset" id="s-reset">—</span></p>
+        <div class="status-chip" id="s-chip"><span class="sw"></span><span id="s-chip-text">—</span></div>
+        <div class="models" id="s-models" hidden></div>
+      </section>
+
+      <section class="tile skel" id="weekly" data-status="good" aria-labelledby="w-label">
+        <div class="tile-head">
+          <span class="tile-label" id="w-label">Weekly</span>
+          <span class="tile-window">resets every 7d</span>
+        </div>
+        <div class="figure">
+          <span class="num" id="w-num">—</span><span class="pct">%</span>
+          <span class="pace" id="w-pace" hidden></span>
+        </div>
+        <div class="meter" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Weekly usage">
+          <i id="w-bar" style="width:0%"></i>
+        </div>
+        <p class="meta">Resets in <span class="reset" id="w-reset">—</span></p>
+        <div class="status-chip" id="w-chip"><span class="sw"></span><span id="w-chip-text">—</span></div>
+        <div class="models" id="w-models" hidden></div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="page">
+    <p id="note">Published read-only — no sign-in needed to view. The owner's session cookie
+    is stored as a GitHub Actions secret; a scheduled workflow scrapes
+    <a href="https://ollama.com/settings" target="_blank" rel="noopener">ollama.com/settings</a>
+    every few minutes and commits <code>usage.json</code>, which this page renders.</p>
+  </footer>
+</div>
+
+<script>
+const STATUS = {
+  good:     "On pace",
+  warning:  "Watch",
+  serious:  "Falling behind",
+  critical: "Over budget",
+};
+
+function $(id) { return document.getElementById(id); }
+
+function relTime(ts) {
+  if (!ts) return "";
+  const s = Math.round((Date.now() / 1000) - ts);
+  if (s < 60) return "updated just now";
+  const m = Math.round(s / 60);
+  if (m < 60) return `updated ${m} min ago`;
+  const h = Math.round(m / 60);
+  if (h < 24) return `updated ${h} h ago`;
+  const d = Math.round(h / 24);
+  return `updated ${d} d ago`;
+}
+
+function fmtCountdown(secs) {
+  // secs = remaining seconds; render a live "Xh Ym" countdown. Fallback to text.
+  if (secs == null || secs < 0) return null;
+  const h = Math.floor(secs / 3600);
+  const m = Math.floor((secs % 3600) / 60);
+  if (h > 0) return `${h}h ${m}m`;
+  if (m > 0) return `${m}m ${Math.floor(secs % 60)}s`;
+  return `${Math.floor(secs)}s`;
+}
+
+function renderWindow(prefix, win) {
+  const pct = (win.percent != null) ? win.percent : null;
+  $(prefix + "-num").textContent = (pct == null) ? "—" : Math.round(pct);
+  const bar = $(prefix + "-bar");
+  bar.style.width = (pct || 0) + "%";
+  const tile = $(prefix === "s" ? "session" : "weekly");
+  const status = win.status || "good";
+  tile.setAttribute("data-status", status);
+  const meter = tile.querySelector(".meter");
+  meter.setAttribute("aria-valuenow", Math.round(pct || 0));
+
+  // Status chip — never color-alone: icon (swatch) + label.
+  $(prefix + "-chip-text").textContent = STATUS[status] || "—";
+
+  // Reset countdown — prefer a live countdown from seconds, else the raw text.
+  const resetEl = $(prefix + "-reset");
+  resetEl.dataset.fallback = win.resets_in || "—";
+  if (win.resets_in_seconds != null) {
+    resetEl.dataset.remaining = win.resets_in_seconds;
+    tick(resetEl);
+  } else {
+    delete resetEl.dataset.remaining;
+    resetEl.textContent = win.resets_in || "—";
+  }
+
+  // Pace annotation (used% vs elapsed fraction of window).
+  const paceEl = $(prefix + "-pace");
+  if (win.pace != null) {
+    paceEl.hidden = false;
+    const mult = win.pace >= 1 ? `${win.pace.toFixed(2)}×` : `${win.pace.toFixed(2)}×`;
+    paceEl.innerHTML = `pace <b>${mult}</b>`;
+  } else {
+    paceEl.hidden = true;
+  }
+
+  // Per-model breakdown table (relief: text labels carry identity, not color).
+  const modelsEl = $(prefix + "-models");
+  if (win.models && win.models.length) {
+    const max = Math.max(1, ...win.models.map(m => m.requests));
+    modelsEl.hidden = false;
+    modelsEl.innerHTML = "<h3>Requests</h3>" +
+      "<table class='models'><thead><tr><th>Model</th><th class='bar-cell'></th><th class='r'>Req</th></tr></thead><tbody>" +
+      win.models.map(m =>
+        `<tr><td>${escapeHtml(m.model)}</td>` +
+        `<td class="bar-cell"><div class="mini"><i style="width:${Math.round(100*m.requests/max)}%"></i></div></td>` +
+        `<td class="r">${m.requests.toLocaleString()}</td></tr>`
+      ).join("") + "</tbody></table>";
+  } else {
+    modelsEl.hidden = true;
+  }
+}
+
+function tick(el) {
+  let r = parseFloat(el.dataset.remaining);
+  if (isNaN(r)) { el.textContent = el.dataset.fallback || "—"; return; }
+  r -= 1;
+  el.dataset.remaining = r;
+  const txt = fmtCountdown(r);
+  el.textContent = txt || el.dataset.fallback || "—";
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c =>
+    ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
+}
+
+function clearSkeleton() {
+  document.querySelectorAll(".skel").forEach(el => el.classList.remove("skel"));
+}
+
+function showError(msg) {
+  clearSkeleton();
+  $("s-num").textContent = "—";
+  $("w-num").textContent = "—";
+  $("updated").textContent = msg;
+}
+
+async function load() {
+  try {
+    const res = await fetch("usage.json", { cache: "no-store" });
+    if (!res.ok) throw new Error(`usage.json HTTP ${res.status}`);
+    const data = await res.json();
+
+    if (data.error) { showError("scrape error: " + data.error); return; }
+
+    clearSkeleton();
+    $("plan").textContent = (data.plan || "unknown");
+    $("updated").textContent = relTime(data.updated_at);
+
+    renderWindow("s", data.session || {});
+    renderWindow("w", data.weekly || {});
+
+    // Live tick both countdowns every second, and refresh "updated" label.
+    setInterval(() => {
+      document.querySelectorAll(".reset[data-remaining]").forEach(tick);
+      $("updated").textContent = relTime(data.updated_at);
+    }, 1000);
+  } catch (e) {
+    showError("couldn't load usage.json — has the workflow run yet?");
+    console.error(e);
+  }
+}
+
+load();
+</script>
+</body>
+</html>

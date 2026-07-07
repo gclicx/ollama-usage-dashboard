@@ -1,0 +1,42 @@
+name: Scrape Ollama Cloud usage
+
+on:
+  schedule:
+    # Every 17 minutes (off the :00/:30 marks to spread load). GitHub Actions
+    # cron can run a few minutes late during peak times — that's expected.
+    - cron: "*/17 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write   # needed to commit usage.json back to the Pages branch
+
+concurrency:
+  group: scrape
+  cancel-in-progress: false
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Scrape usage
+        env:
+          OLLAMA_CLOUD_COOKIE: ${{ secrets.OLLAMA_CLOUD_COOKIE }}
+        run: python3 scraper.py usage.json
+
+      - name: Commit if changed
+        run: |
+          if git diff --quiet -- usage.json; then
+            echo "usage.json unchanged — nothing to commit."
+            exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add usage.json
+          git commit -m "chore: update Ollama Cloud usage"
+          git push

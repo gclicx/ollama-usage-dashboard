@@ -32,6 +32,10 @@ USER_AGENT = (
 SESSION_WINDOW_S = 5 * 3600
 WEEKLY_WINDOW_S = 7 * 24 * 3600
 
+# How many history points to retain. At the default ~17-min cron cadence that's
+# ~84 points/day, so 1440 ≈ 17 days of usage-over-time history.
+HISTORY_MAX = int(os.getenv("HISTORY_MAX", "1440"))
+
 
 def _parse_duration(text: str):
     """Parse a human duration like '3h 12m', '45m', '2d 4h 10m' into seconds.
@@ -177,6 +181,37 @@ def parse_settings(html: str) -> dict:
     return result
 
 
+def update_history(path: str, data: dict) -> None:
+    """Append this snapshot to history.json and cap to HISTORY_MAX newest points.
+
+    Each point is intentionally minimal: {t, s, w} — unix timestamp plus the
+    session and weekly percentages. Reset timers / model counts / pace are not
+    stored per point (they're only meaningful for the current snapshot in
+    usage.json), which keeps history.json small.
+    """
+    s = data.get("session", {}).get("percent")
+    w = data.get("weekly", {}).get("percent")
+    if s is None and w is None:
+        return  # nothing useful to record
+
+    history = []
+    try:
+        with open(path) as f:
+            history = json.load(f)
+            if not isinstance(history, list):
+                history = []
+    except (FileNotFoundError, ValueError):
+        history = []
+
+    history.append({"t": data["updated_at"], "s": s, "w": w})
+    if len(history) > HISTORY_MAX:
+        history = history[-HISTORY_MAX:]
+
+    with open(path, "w") as f:
+        json.dump(history, f, separators=(",", ":"))
+    print(f"Wrote {path}: {len(history)} points (cap {HISTORY_MAX})")
+
+
 def fetch_settings(cookie: str) -> str:
     req = urllib.request.Request(
         SETTINGS_URL,
@@ -193,6 +228,7 @@ def fetch_settings(cookie: str) -> str:
 
 def main():
     out_path = sys.argv[1] if len(sys.argv) > 1 else "usage.json"
+    history_path = sys.argv[2] if len(sys.argv) > 2 else "history.json"
     cookie = os.getenv("OLLAMA_CLOUD_COOKIE", "").strip()
     if not cookie:
         print("OLLAMA_CLOUD_COOKIE env var not set", file=sys.stderr)
@@ -216,6 +252,8 @@ def main():
     print(f"Wrote {out_path}: session "
           f"{data.get('session', {}).get('percent')}% / weekly "
           f"{data.get('weekly', {}).get('percent')}%")
+
+    update_history(history_path, data)
 
 
 if __name__ == "__main__":

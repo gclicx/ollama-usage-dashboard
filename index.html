@@ -17,7 +17,8 @@
     --base:      #c3c2b7;
     --border:    rgba(11,11,11,0.10);
 
-    --series-1:  #2a78d6;   /* meter fill (sequential blue, step 450) */
+    --series-1:  #2a78d6;   /* session line (categorical slot 1, blue) */
+    --series-2:  #1baf7a;   /* weekly line  (categorical slot 2, aqua) */
     --good:      #0ca30c;
     --warning:   #fab219;
     --serious:   #ec835a;
@@ -34,6 +35,7 @@
       --base:      #383835;
       --border:    rgba(255,255,255,0.10);
       --series-1:  #3987e5;
+      --series-2:  #199e70;
     }
   }
   /* Status fill overrides per meter; status colors are the same in both modes. */
@@ -118,6 +120,45 @@
 
   .empty { color: var(--muted); font-style: italic; font-size: 13px; }
 
+  /* ---- Usage-over-time line chart ---- */
+  .chart { margin-top: 16px; background: var(--surface-1); border: 1px solid var(--border); border-radius: 14px; padding: 20px; }
+  .chart-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+  .chart-title { font-size: 13px; font-weight: 600; color: var(--ink-2); }
+  .legend { display: inline-flex; gap: 16px; font-size: 12px; color: var(--ink-2); }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .legend i { width: 14px; height: 2px; border-radius: 2px; display: inline-block; }
+  .legend .l1 i { background: var(--series-1); }
+  .legend .l2 i { background: var(--series-2); }
+
+  .chart-frame { position: relative; width: 100%; }
+  #chart { display: block; width: 100%; height: auto; overflow: visible; }
+  #chart .gridline { stroke: var(--grid); stroke-width: 1; }
+  #chart .axislbl { fill: var(--muted); font-size: 10px; font-variant-numeric: tabular-nums; }
+  #chart .series { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+  #chart .s1 { stroke: var(--series-1); }
+  #chart .s2 { stroke: var(--series-2); }
+  #chart .endpt { stroke: var(--surface-1); stroke-width: 1.5; }
+  #chart .endlbl { font-size: 11px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  #chart .endlbl.s1 { fill: var(--series-1); }
+  #chart .endlbl.s2 { fill: var(--series-2); }
+  #chart .crosshair { stroke: var(--base); stroke-width: 1; stroke-dasharray: 3 3; }
+  #chart .hit { fill: transparent; cursor: crosshair; }
+  #chart .focus { stroke: var(--surface-1); stroke-width: 1.5; }
+
+  .tooltip {
+    position: absolute; pointer-events: none; transform: translate(-50%, -100%);
+    background: var(--surface-1); border: 1px solid var(--border); border-radius: 8px;
+    padding: 8px 10px; font-size: 12px; color: var(--ink); white-space: nowrap;
+    box-shadow: 0 4px 14px rgba(0,0,0,.12); margin-top: -10px; z-index: 2;
+  }
+  .tooltip .tt-t { color: var(--muted); display: block; margin-bottom: 4px; font-variant-numeric: tabular-nums; }
+  .tooltip .tt-r { display: flex; align-items: center; gap: 6px; }
+  .tooltip .tt-r i { width: 8px; height: 8px; border-radius: 2px; display: inline-block; }
+  .tooltip .tt-r.s1 i { background: var(--series-1); }
+  .tooltip .tt-r.s2 i { background: var(--series-2); }
+  .tooltip .tt-r b { font-variant-numeric: tabular-nums; font-weight: 600; margin-left: auto; }
+  .chart-empty { color: var(--muted); font-style: italic; font-size: 13px; padding: 28px 0; text-align: center; }
+
   footer.page { margin-top: 36px; color: var(--muted); font-size: 12.5px; line-height: 1.6; }
   footer.page a { color: var(--ink-2); }
 
@@ -174,13 +215,31 @@
         <div class="models" id="w-models" hidden></div>
       </section>
     </div>
+
+    <section class="chart" aria-label="Usage over time">
+      <div class="chart-head">
+        <span class="chart-title">Usage over time</span>
+        <span class="legend">
+          <span class="l1"><i></i> Session</span>
+          <span class="l2"><i></i> Weekly</span>
+        </span>
+      </div>
+      <div class="chart-frame">
+        <div class="chart-empty" id="chart-empty">Collecting history — check back after a few scheduled runs.</div>
+        <svg id="chart" viewBox="0 0 700 200" role="img" aria-label="Session and weekly usage percentage over time" hidden>
+          <desc>Line chart of session (blue) and weekly (aqua) usage percent over the retained history window.</desc>
+        </svg>
+        <div class="tooltip" id="tooltip" hidden></div>
+      </div>
+    </section>
   </main>
 
   <footer class="page">
     <p id="note">Published read-only — no sign-in needed to view. The owner's session cookie
     is stored as a GitHub Actions secret; a scheduled workflow scrapes
     <a href="https://ollama.com/settings" target="_blank" rel="noopener">ollama.com/settings</a>
-    every few minutes and commits <code>usage.json</code>, which this page renders.</p>
+    every few minutes and commits <code>usage.json</code> and <code>history.json</code>,
+    which this page renders.</p>
   </footer>
 </div>
 
@@ -295,28 +354,162 @@ function showError(msg) {
 
 async function load() {
   try {
-    const res = await fetch("usage.json", { cache: "no-store" });
-    if (!res.ok) throw new Error(`usage.json HTTP ${res.status}`);
-    const data = await res.json();
+    const [usageRes, histRes] = await Promise.all([
+      fetch("usage.json", { cache: "no-store" }),
+      fetch("history.json", { cache: "no-store" }).catch(() => null),
+    ]);
+    if (!usageRes.ok) throw new Error(`usage.json HTTP ${usageRes.status}`);
+    const data = await usageRes.json();
 
-    if (data.error) { showError("scrape error: " + data.error); return; }
-
-    clearSkeleton();
-    $("plan").textContent = (data.plan || "unknown");
-    $("updated").textContent = relTime(data.updated_at);
-
-    renderWindow("s", data.session || {});
-    renderWindow("w", data.weekly || {});
-
-    // Live tick both countdowns every second, and refresh "updated" label.
-    setInterval(() => {
-      document.querySelectorAll(".reset[data-remaining]").forEach(tick);
+    if (data.error) { showError("scrape error: " + data.error); }
+    else {
+      clearSkeleton();
+      $("plan").textContent = (data.plan || "unknown");
       $("updated").textContent = relTime(data.updated_at);
-    }, 1000);
+      renderWindow("s", data.session || {});
+      renderWindow("w", data.weekly || {});
+      // Live tick both countdowns every second, and refresh "updated" label.
+      setInterval(() => {
+        document.querySelectorAll(".reset[data-remaining]").forEach(tick);
+        $("updated").textContent = relTime(data.updated_at);
+      }, 1000);
+    }
+
+    // History is optional — missing file on first run just leaves the empty state.
+    if (histRes && histRes.ok) {
+      try { renderChart(await histRes.json()); } catch (e) { console.warn(e); }
+    }
   } catch (e) {
     showError("couldn't load usage.json — has the workflow run yet?");
     console.error(e);
   }
+}
+
+/* ---------------- Usage-over-time line chart ---------------- */
+const CHART = { W: 700, H: 200, padL: 34, padR: 58, padT: 12, padB: 22 };
+let CHART_POINTS = [];
+
+function chartGeom() {
+  const { W, H, padL, padR, padT, padB } = CHART;
+  return { x0: padL, x1: W - padR, y0: padT, y1: H - padB,
+           pw: W - padR - padL, ph: H - padB - padT };
+}
+function xFor(t, tMin, tMax, g) {
+  if (tMax === tMin) return g.x0;
+  return g.x0 + (t - tMin) / (tMax - tMin) * g.pw;
+}
+function yFor(pct, g) { return g.y1 - Math.max(0, Math.min(100, pct || 0)) / 100 * g.ph; }
+
+function buildPath(points, key, tMin, tMax, g) {
+  const pts = points.filter(p => p[key] != null);
+  if (!pts.length) return "";
+  return pts.map((p, i) =>
+    `${i ? "L" : "M"}${xFor(p.t, tMin, tMax, g).toFixed(1)},${yFor(p[key], g).toFixed(1)}`
+  ).join(" ");
+}
+
+function fmtAxisTime(t) {
+  const d = new Date(t * 1000);
+  return d.toLocaleDateString([], { month: "short", day: "numeric" }) +
+         " " + d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+}
+
+function renderChart(history) {
+  const svg = $("chart");
+  if (!Array.isArray(history) || history.length < 2) {
+    $("chart-empty").hidden = false; svg.hidden = true; return;
+  }
+  CHART_POINTS = history;
+  $("chart-empty").hidden = true; svg.hidden = false;
+
+  const g = chartGeom();
+  const ts = history.map(p => p.t);
+  const tMin = Math.min(...ts), tMax = Math.max(...ts);
+
+  // Gridlines + y labels at 0/25/50/75/100. Recessive (hairline), one shared 0-100% axis.
+  let grid = "";
+  for (const v of [0, 25, 50, 75, 100]) {
+    const y = yFor(v, g);
+    grid += `<line class="gridline" x1="${g.x0}" y1="${y}" x2="${g.x1}" y2="${y}"/>`;
+    grid += `<text class="axislbl" x="${g.x0 - 6}" y="${y + 3}" text-anchor="end">${v}</text>`;
+  }
+  // X axis labels: first and last timestamps.
+  grid += `<text class="axislbl" x="${g.x0}" y="${CHART.H - 6}">${fmtAxisTime(tMin)}</text>`;
+  grid += `<text class="axislbl" x="${g.x1}" y="${CHART.H - 6}" text-anchor="end">${fmtAxisTime(tMax)}</text>`;
+
+  const p1 = buildPath(history, "s", tMin, tMax, g);
+  const p2 = buildPath(history, "w", tMin, tMax, g);
+
+  // Last-point markers + direct labels (identity not color-alone).
+  const last = history[history.length - 1];
+  const lx = xFor(last.t, tMin, tMax, g);
+  let ends = "";
+  if (last.s != null) {
+    const y = yFor(last.s, g);
+    ends += `<circle class="endpt s1" cx="${lx}" cy="${y}" r="3.5" fill="var(--series-1)"/>`;
+    ends += `<text class="endlbl s1" x="${lx + 7}" y="${y + 3}">${Math.round(last.s)}%</text>`;
+  }
+  if (last.w != null) {
+    const y = yFor(last.w, g);
+    // nudge weekly label below session's if they'd collide
+    const below = (last.s != null && Math.abs(yFor(last.s, g) - y) < 14);
+    ends += `<circle class="endpt s2" cx="${lx}" cy="${y}" r="3.5" fill="var(--series-2)"/>`;
+    ends += `<text class="endlbl s2" x="${lx + 7}" y="${y + (below ? 12 : 3)}">${Math.round(last.w)}%</text>`;
+  }
+
+  svg.innerHTML =
+    grid +
+    `<path class="series s1" d="${p1}"/>` +
+    `<path class="series s2" d="${p2}"/>` +
+    ends +
+    // crosshair + focus dots (hidden until hover)
+    `<line class="crosshair" id="xhair" x1="0" y1="${g.y0}" x2="0" y2="${g.y1}" hidden/>` +
+    `<circle class="focus" id="f1" r="3.5" fill="var(--series-1)" hidden/>` +
+    `<circle class="focus" id="f2" r="3.5" fill="var(--series-2)" hidden/>` +
+    `<rect class="hit" x="${g.x0}" y="${g.y0}" width="${g.pw}" height="${g.ph}"/>`;
+
+  attachChartHover(tMin, tMax, g);
+}
+
+function attachChartHover(tMin, tMax, g) {
+  const svg = $("chart");
+  const hit = svg.querySelector(".hit");
+  const xhair = $("xhair"), f1 = $("f1"), f2 = $("f2"), tip = $("tooltip");
+  if (!CHART_POINTS.length) return;
+
+  function onMove(ev) {
+    const rect = svg.getBoundingClientRect();
+    const px = (ev.clientX - rect.left) / rect.width * CHART.W;
+    // nearest point by x
+    let best = CHART_POINTS[0], bestDx = Infinity;
+    for (const p of CHART_POINTS) {
+      const dx = Math.abs(xFor(p.t, tMin, tMax, g) - px);
+      if (dx < bestDx) { bestDx = dx; best = p; }
+    }
+    const cx = xFor(best.t, tMin, tMax, g);
+    xhair.setAttribute("x1", cx); xhair.setAttribute("x2", cx); xhair.hidden = false;
+    if (best.s != null) { f1.setAttribute("cx", cx); f1.setAttribute("cy", yFor(best.s, g)); f1.hidden = false; }
+    else f1.hidden = true;
+    if (best.w != null) { f2.setAttribute("cx", cx); f2.setAttribute("cy", yFor(best.w, g)); f2.hidden = false; }
+    else f2.hidden = true;
+
+    // tooltip (positioned in CSS pixels relative to .chart-frame)
+    const frame = svg.parentElement.getBoundingClientRect();
+    const scaleX = rect.width / CHART.W;
+    const tipX = (rect.left - frame.left) + cx * scaleX;
+    const topY = (rect.top - frame.top) + yFor(Math.max(best.s || 0, best.w || 0), g) * (rect.height / CHART.H);
+    tip.style.left = tipX + "px";
+    tip.style.top = topY + "px";
+    tip.hidden = false;
+    let rows = "";
+    if (best.s != null) rows += `<div class="tt-r s1"><i></i>Session<b>${Math.round(best.s)}%</b></div>`;
+    if (best.w != null) rows += `<div class="tt-r s2"><i></i>Weekly<b>${Math.round(best.w)}%</b></div>`;
+    tip.innerHTML = `<span class="tt-t">${fmtAxisTime(best.t)}</span>${rows}`;
+  }
+  hit.addEventListener("mousemove", onMove);
+  hit.addEventListener("mouseleave", () => {
+    xhair.hidden = true; f1.hidden = true; f2.hidden = true; tip.hidden = true;
+  });
 }
 
 load();

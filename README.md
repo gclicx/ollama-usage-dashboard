@@ -13,11 +13,13 @@ GitHub Pages renders it. Viewers never see your cookie — only the numbers.
 ```
   ┌──────────── GitHub Actions (cron, every 17 min) ────────────┐
   │  scraper.py ──cookie──▶ ollama.com/settings ──▶ usage.json   │
+  │                                          └──▶ history.json  │
   │            (OLLAMA_CLOUD_COOKIE is a repo secret)           │
   └──────────────────────────┬──────────────────────────────────┘
                              │ committed to the repo
   ┌──────────────────────────▼──────────────────────────────────┐
-  │  GitHub Pages serves index.html + usage.json  → public URL  │
+  │  GitHub Pages serves index.html + usage.json + history.json │
+  │                          → public URL                       │
   └────────────────────────────────────────────────────────────┘
 ```
 
@@ -53,10 +55,19 @@ The scheduled cron takes over from there (every ~17 minutes).
 
 | Path | Role |
 |------|------|
-| `scraper.py` | Fetches `ollama.com/settings` with the cookie, parses plan + session/weekly %, reset timers, model counts; computes a *pace* ratio and a status; writes `usage.json`. |
-| `index.html` | Static page. Fetches `usage.json`, renders two stat-tile meters + model tables. Light/dark via `prefers-color-scheme`. No build step, no JS framework. |
-| `usage.json` | The committed snapshot the page renders. |
-| `.github/workflows/scrape.yml` | Cron + manual dispatch; runs the scraper and commits `usage.json` when it changes. |
+| `scraper.py` | Fetches `ollama.com/settings` with the cookie, parses plan + session/weekly %, reset timers, model counts; computes a *pace* ratio and a status; writes `usage.json` and appends a point to `history.json`. |
+| `index.html` | Static page. Fetches `usage.json` + `history.json`, renders two stat-tile meters, a usage-over-time line chart, and model tables. Light/dark via `prefers-color-scheme`. No build step, no JS framework. |
+| `usage.json` | The current snapshot the meters render. |
+| `history.json` | Time series of `{t, s, w}` points (timestamp + session/weekly %) for the line chart. Capped to the newest `HISTORY_MAX` points. |
+| `.github/workflows/scrape.yml` | Cron + manual dispatch; runs the scraper and commits `usage.json`/`history.json` when either changes. |
+
+### History & retention
+
+Each run appends one point to `history.json` and trims to the **newest
+`HISTORY_MAX`** points (default `1440` ≈ 17 days at the 17-min cadence). Tune it
+by setting `HISTORY_MAX` in the workflow's `Scrape usage` step env. The file is
+kept compact (no per-point model counts or timers — those live only in the
+current `usage.json`), ~80 KB at the default cap.
 
 ## How the meter color works
 
@@ -90,8 +101,8 @@ percent thresholds.
 
 ```bash
 export OLLAMA_CLOUD_COOKIE='__Secure-session=...'
-python3 scraper.py usage.json      # writes usage.json
-python3 -m http.server 8000        # open http://localhost:8000/
+python3 scraper.py usage.json history.json   # writes usage.json + history.json
+python3 -m http.server 8000                   # open http://localhost:8000/
 ```
 
 ## Credits

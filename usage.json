@@ -1,25 +1,25 @@
 {
   "plan": "Pro",
   "session": {
-    "percent": 0.0,
-    "resets_in": "2 hours",
+    "percent": 0.1,
+    "resets_in": "28 minutes",
     "models": [
       {
         "model": "gemma4:31b",
-        "requests": 35
+        "requests": 93
       }
     ],
-    "resets_in_seconds": 7200,
-    "pace": 0.0,
+    "resets_in_seconds": 1680,
+    "pace": 0.0011029411764705882,
     "status": "good"
   },
   "weekly": {
-    "percent": 33.3,
+    "percent": 33.4,
     "resets_in": "4 days",
     "models": [
       {
         "model": "gemma4:31b",
-        "requests": 235
+        "requests": 293
       },
       {
         "model": "gemini-3-flash-preview",
@@ -35,8 +35,8 @@
       }
     ],
     "resets_in_seconds": 345600,
-    "pace": 0.7769999999999999,
+    "pace": 0.7793333333333333,
     "status": "good"
   },
-  "updated_at": 1783503453
+  "updated_at": 1783510319
 }

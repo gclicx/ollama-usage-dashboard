@@ -2,7 +2,7 @@
   "plan": "Pro",
   "session": {
     "percent": 0.5,
-    "resets_in": "3 hours",
+    "resets_in": "2 hours",
     "models": [
       {
         "model": "gemini-3-flash-preview",
@@ -13,8 +13,8 @@
         "requests": 5
       }
     ],
-    "resets_in_seconds": 10800,
-    "pace": 0.012499999999999999,
+    "resets_in_seconds": 7200,
+    "pace": 0.008333333333333333,
     "status": "good"
   },
   "weekly": {
@@ -54,5 +54,5 @@
     "pace": 1.141,
     "status": "serious"
   },
-  "updated_at": 1783790187
+  "updated_at": 1783793415
 }

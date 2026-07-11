@@ -2,16 +2,16 @@
   "plan": "Pro",
   "session": {
     "percent": 57.5,
-    "resets_in": "3 hours",
+    "resets_in": "2 hours",
     "models": [
       {
         "model": "glm-5.2",
         "requests": 209
       }
     ],
-    "resets_in_seconds": 10800,
-    "pace": 1.4374999999999998,
-    "status": "critical"
+    "resets_in_seconds": 7200,
+    "pace": 0.9583333333333333,
+    "status": "warning"
   },
   "weekly": {
     "percent": 95.5,
@@ -42,5 +42,5 @@
     "pace": 1.1141666666666667,
     "status": "serious"
   },
-  "updated_at": 1783769940
+  "updated_at": 1783773702
 }

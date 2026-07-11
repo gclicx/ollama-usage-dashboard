@@ -2,8 +2,8 @@
   "plan": "Pro",
   "session": {
     "percent": 0.0,
-    "resets_in": "3 hours",
-    "resets_in_seconds": 10800,
+    "resets_in": "1 hour",
+    "resets_in_seconds": 3600,
     "pace": 0.0,
     "status": "good"
   },
@@ -44,5 +44,5 @@
     "pace": 1.141,
     "status": "serious"
   },
-  "updated_at": 1783808689
+  "updated_at": 1783812609
 }

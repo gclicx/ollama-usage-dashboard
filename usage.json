@@ -2,14 +2,14 @@
   "plan": "Pro",
   "session": {
     "percent": 0.0,
-    "resets_in": "1 hour",
-    "resets_in_seconds": 3600,
+    "resets_in": "23 minutes",
+    "resets_in_seconds": 1380,
     "pace": 0.0,
     "status": "good"
   },
   "weekly": {
     "percent": 95.5,
-    "resets_in": "2 hours",
+    "resets_in": "1 hour",
     "models": [
       {
         "model": "kimi-k2.6",
@@ -28,9 +28,9 @@
         "requests": 1439
       }
     ],
-    "resets_in_seconds": 7200,
-    "pace": 0.9665060240963854,
+    "resets_in_seconds": 3600,
+    "pace": 0.9607185628742514,
     "status": "warning"
   },
-  "updated_at": 1784497617
+  "updated_at": 1784500567
 }

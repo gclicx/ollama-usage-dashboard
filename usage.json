@@ -2,8 +2,14 @@
   "plan": "Pro",
   "session": {
     "percent": 0.0,
-    "resets_in": "2 hours",
-    "resets_in_seconds": 7200,
+    "resets_in": "41 minutes",
+    "models": [
+      {
+        "model": "deepseek-v4-flash",
+        "requests": 6
+      }
+    ],
+    "resets_in_seconds": 2460,
     "pace": 0.0,
     "status": "good"
   },
@@ -17,7 +23,7 @@
       },
       {
         "model": "deepseek-v4-flash",
-        "requests": 124
+        "requests": 130
       },
       {
         "model": "minimax-m3",
@@ -28,5 +34,5 @@
     "pace": 0.22959999999999997,
     "status": "good"
   },
-  "updated_at": 1784927018
+  "updated_at": 1784931507
 }

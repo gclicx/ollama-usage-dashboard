@@ -2,22 +2,28 @@
   "plan": "Pro",
   "session": {
     "percent": 0.0,
-    "resets_in": "2 hours",
-    "resets_in_seconds": 7200,
-    "pace": 0.0,
+    "resets_in": "5 hours",
+    "models": [
+      {
+        "model": "deepseek-v4-flash",
+        "requests": 3
+      }
+    ],
+    "resets_in_seconds": 18000,
+    "pace": null,
     "status": "good"
   },
   "weekly": {
-    "percent": 16.3,
+    "percent": 16.4,
     "resets_in": "2 days",
     "models": [
       {
         "model": "glm-5.2",
-        "requests": 48
+        "requests": 53
       },
       {
         "model": "deepseek-v4-flash",
-        "requests": 88
+        "requests": 103
       },
       {
         "model": "minimax-m3",
@@ -25,8 +31,8 @@
       }
     ],
     "resets_in_seconds": 172800,
-    "pace": 0.22820000000000001,
+    "pace": 0.22959999999999997,
     "status": "good"
   },
-  "updated_at": 1784892422
+  "updated_at": 1784898124
 }

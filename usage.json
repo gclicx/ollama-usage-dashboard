@@ -1,30 +1,30 @@
 {
   "plan": "Pro",
   "session": {
-    "percent": 0.1,
-    "resets_in": "4 hours",
+    "percent": 9.7,
+    "resets_in": "34 minutes",
     "models": [
       {
         "model": "minimax-m3",
-        "requests": 18
+        "requests": 155
       }
     ],
-    "resets_in_seconds": 14400,
-    "pace": 0.005,
+    "resets_in_seconds": 2040,
+    "pace": 0.10939849624060148,
     "status": "good"
   },
   "weekly": {
-    "percent": 0.0,
+    "percent": 1.8,
     "resets_in": "6 days",
     "models": [
       {
         "model": "minimax-m3",
-        "requests": 58
+        "requests": 195
       }
     ],
     "resets_in_seconds": 518400,
-    "pace": 0.0,
+    "pace": 0.12600000000000003,
     "status": "good"
   },
-  "updated_at": 1785154800
+  "updated_at": 1785165901
 }

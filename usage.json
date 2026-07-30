@@ -1,24 +1,10 @@
 {
   "plan": "Pro",
   "session": {
-    "percent": 9.2,
-    "resets_in": "2 hours",
-    "models": [
-      {
-        "model": "qwen3.5:397b",
-        "requests": 41
-      },
-      {
-        "model": "kimi-k2.7-code",
-        "requests": 20
-      },
-      {
-        "model": "minimax-m3",
-        "requests": 39
-      }
-    ],
-    "resets_in_seconds": 7200,
-    "pace": 0.15333333333333335,
+    "percent": 0.0,
+    "resets_in": "4 hours",
+    "resets_in_seconds": 14400,
+    "pace": 0.0,
     "status": "good"
   },
   "weekly": {
@@ -39,12 +25,12 @@
       },
       {
         "model": "minimax-m3",
-        "requests": 389
+        "requests": 393
       }
     ],
     "resets_in_seconds": 259200,
     "pace": 0.06300000000000001,
     "status": "good"
   },
-  "updated_at": 1785414391
+  "updated_at": 1785423071
 }

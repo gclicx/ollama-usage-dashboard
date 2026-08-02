@@ -2,14 +2,14 @@
   "plan": "Pro",
   "session": {
     "percent": 0.0,
-    "resets_in": "1 hour",
-    "resets_in_seconds": 3600,
+    "resets_in": "20 minutes",
+    "resets_in_seconds": 1200,
     "pace": 0.0,
     "status": "good"
   },
   "weekly": {
     "percent": 3.6,
-    "resets_in": "3 hours",
+    "resets_in": "2 hours",
     "models": [
       {
         "model": "qwen3.5:397b",
@@ -28,9 +28,9 @@
         "requests": 393
       }
     ],
-    "resets_in_seconds": 10800,
-    "pace": 0.03665454545454546,
+    "resets_in_seconds": 7200,
+    "pace": 0.03643373493975904,
     "status": "good"
   },
-  "updated_at": 1785703051
+  "updated_at": 1785706766
 }

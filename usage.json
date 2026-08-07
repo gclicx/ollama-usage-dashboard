@@ -2,7 +2,7 @@
   "plan": "Pro",
   "session": {
     "percent": 0.2,
-    "resets_in": "2 hours",
+    "resets_in": "47 minutes",
     "models": [
       {
         "model": "web search",
@@ -13,8 +13,8 @@
         "requests": 16
       }
     ],
-    "resets_in_seconds": 7200,
-    "pace": 0.0033333333333333335,
+    "resets_in_seconds": 2820,
+    "pace": 0.0023715415019762843,
     "status": "good"
   },
   "weekly": {
@@ -46,5 +46,5 @@
     "pace": 0.07839999999999998,
     "status": "good"
   },
-  "updated_at": 1786134216
+  "updated_at": 1786137123
 }

@@ -12,7 +12,7 @@
     "resets_in": "1 day",
     "models": [
       {
-        "model": "40a40a40-94b6-4062-8fa6-c4401ce13772",
+        "model": "deepseek-v4-pro:0813",
         "requests": 80
       },
       {
@@ -28,5 +28,5 @@
     "pace": 0.03266666666666666,
     "status": "good"
   },
-  "updated_at": 1786812852
+  "updated_at": 1786814173
 }

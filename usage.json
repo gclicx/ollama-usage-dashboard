@@ -2,14 +2,14 @@
   "plan": "Pro",
   "session": {
     "percent": 0.0,
-    "resets_in": "59 minutes",
-    "resets_in_seconds": 3540,
+    "resets_in": "21 minutes",
+    "resets_in_seconds": 1260,
     "pace": 0.0,
     "status": "good"
   },
   "weekly": {
     "percent": 3.8,
-    "resets_in": "4 hours",
+    "resets_in": "3 hours",
     "models": [
       {
         "model": "deepseek-v4-pro:0813",
@@ -24,9 +24,9 @@
         "requests": 31
       }
     ],
-    "resets_in_seconds": 14400,
-    "pace": 0.03892682926829268,
+    "resets_in_seconds": 10800,
+    "pace": 0.038690909090909095,
     "status": "good"
   },
-  "updated_at": 1786910434
+  "updated_at": 1786912683
 }

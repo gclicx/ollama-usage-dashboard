@@ -9,7 +9,7 @@
   },
   "weekly": {
     "percent": 6.6,
-    "resets_in": "24 minutes",
+    "resets_in": "less than a minute",
     "models": [
       {
         "model": "kimi-k3",
@@ -28,9 +28,8 @@
         "requests": 2
       }
     ],
-    "resets_in_seconds": 1440,
-    "pace": 0.06615751789976133,
+    "pace": null,
     "status": "good"
   },
-  "updated_at": 1787528103
+  "updated_at": 1787529598
 }

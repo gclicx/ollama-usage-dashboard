@@ -9,7 +9,7 @@
   },
   "weekly": {
     "percent": 0.4,
-    "resets_in": "4 days",
+    "resets_in": "3 days",
     "models": [
       {
         "model": "deepseek-v4-pro:0813",
@@ -20,9 +20,9 @@
         "requests": 12
       }
     ],
-    "resets_in_seconds": 345600,
-    "pace": 0.009333333333333334,
+    "resets_in_seconds": 259200,
+    "pace": 0.007,
     "status": "good"
   },
-  "updated_at": 1787782068
+  "updated_at": 1787800733
 }

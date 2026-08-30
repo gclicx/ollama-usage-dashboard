@@ -9,7 +9,7 @@
   },
   "weekly": {
     "percent": 2.2,
-    "resets_in": "18 hours",
+    "resets_in": "13 hours",
     "models": [
       {
         "model": "kimi-k3",
@@ -29,12 +29,12 @@
       },
       {
         "model": "gpt-oss:20b",
-        "requests": 18
+        "requests": 38
       }
     ],
-    "resets_in_seconds": 64800,
-    "pace": 0.024640000000000002,
+    "resets_in_seconds": 46800,
+    "pace": 0.023845161290322582,
     "status": "good"
   },
-  "updated_at": 1788069237
+  "updated_at": 1788088015
 }

@@ -9,7 +9,7 @@
   },
   "weekly": {
     "percent": 5.9,
-    "resets_in": "1 day",
+    "resets_in": "19 hours",
     "models": [
       {
         "model": "gemma4:31b",
@@ -25,16 +25,16 @@
       },
       {
         "model": "deepseek-v4-pro:0813",
-        "requests": 130
+        "requests": 139
       },
       {
         "model": "minimax-m3",
         "requests": 1
       }
     ],
-    "resets_in_seconds": 86400,
-    "pace": 0.06883333333333334,
+    "resets_in_seconds": 68400,
+    "pace": 0.06652348993288591,
     "status": "good"
   },
-  "updated_at": 1788653371
+  "updated_at": 1788669579
 }

@@ -2,14 +2,14 @@
   "plan": "Pro",
   "session": {
     "percent": 0.0,
-    "resets_in": "4 hours",
-    "resets_in_seconds": 14400,
+    "resets_in": "2 hours",
+    "resets_in_seconds": 7200,
     "pace": 0.0,
     "status": "good"
   },
   "weekly": {
     "percent": 42.6,
-    "resets_in": "2 days",
+    "resets_in": "1 day",
     "models": [
       {
         "model": "gemma4:31b",
@@ -40,9 +40,9 @@
         "requests": 10
       }
     ],
-    "resets_in_seconds": 172800,
-    "pace": 0.5963999999999999,
+    "resets_in_seconds": 86400,
+    "pace": 0.497,
     "status": "good"
   },
-  "updated_at": 1789168651
+  "updated_at": 1789176356
 }

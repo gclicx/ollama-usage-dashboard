@@ -3,6 +3,12 @@
   "session": {
     "percent": 0.0,
     "resets_in": "2 hours",
+    "models": [
+      {
+        "model": "gemma4:31b",
+        "requests": 2
+      }
+    ],
     "resets_in_seconds": 7200,
     "pace": 0.0,
     "status": "good"
@@ -11,6 +17,10 @@
     "percent": 36.7,
     "resets_in": "4 days",
     "models": [
+      {
+        "model": "gemma4:31b",
+        "requests": 2
+      },
       {
         "model": "kimi-k3",
         "requests": 52
@@ -32,5 +42,5 @@
     "pace": 0.8563333333333335,
     "status": "warning"
   },
-  "updated_at": 1789535224
+  "updated_at": 1789552629
 }

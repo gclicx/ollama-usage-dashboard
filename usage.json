@@ -2,14 +2,14 @@
   "plan": "Pro",
   "session": {
     "percent": 0.0,
-    "resets_in": "4 hours",
+    "resets_in": "44 minutes",
     "models": [
       {
         "model": "gemma4:31b",
         "requests": 2
       }
     ],
-    "resets_in_seconds": 14400,
+    "resets_in_seconds": 2640,
     "pace": 0.0,
     "status": "good"
   },
@@ -30,5 +30,5 @@
     "pace": 0.19599999999999998,
     "status": "good"
   },
-  "updated_at": 1790104544
+  "updated_at": 1790115311
 }

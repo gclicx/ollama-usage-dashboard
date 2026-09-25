@@ -1,10 +1,16 @@
 {
   "plan": "Pro",
   "session": {
-    "percent": 0.0,
-    "resets_in": "16 minutes",
-    "resets_in_seconds": 960,
-    "pace": 0.0,
+    "percent": 0.4,
+    "resets_in": "24 minutes",
+    "models": [
+      {
+        "model": "glm-5.3-flash",
+        "requests": 1
+      }
+    ],
+    "resets_in_seconds": 1440,
+    "pace": 0.004347826086956522,
     "status": "good"
   },
   "weekly": {
@@ -17,7 +23,7 @@
       },
       {
         "model": "glm-5.3-flash",
-        "requests": 436
+        "requests": 437
       },
       {
         "model": "deepseek-v4-pro:0813",
@@ -28,5 +34,5 @@
     "pace": 0.0896,
     "status": "good"
   },
-  "updated_at": 1790315001
+  "updated_at": 1790332522
 }

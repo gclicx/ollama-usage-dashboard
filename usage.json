@@ -2,8 +2,8 @@
   "plan": "Pro",
   "session": {
     "percent": 0.0,
-    "resets_in": "26 minutes",
-    "resets_in_seconds": 1560,
+    "resets_in": "43 minutes",
+    "resets_in_seconds": 2580,
     "pace": 0.0,
     "status": "good"
   },
@@ -11,6 +11,10 @@
     "percent": 4.1,
     "resets_in": "4 days",
     "models": [
+      {
+        "model": "gemma4:31b",
+        "requests": 2
+      },
       {
         "model": "glm-5.3-flash",
         "requests": 249
@@ -28,5 +32,5 @@
     "pace": 0.09566666666666666,
     "status": "good"
   },
-  "updated_at": 1790782382
+  "updated_at": 1790799365
 }

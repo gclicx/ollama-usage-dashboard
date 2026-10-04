@@ -3,17 +3,23 @@
   "session": {
     "percent": 0.0,
     "resets_in": "2 hours",
+    "models": [
+      {
+        "model": "gemma4:31b",
+        "requests": 4
+      }
+    ],
     "resets_in_seconds": 7200,
     "pace": 0.0,
     "status": "good"
   },
   "weekly": {
     "percent": 29.1,
-    "resets_in": "11 hours",
+    "resets_in": "6 hours",
     "models": [
       {
         "model": "gemma4:31b",
-        "requests": 33
+        "requests": 37
       },
       {
         "model": "kimi-k3",
@@ -36,9 +42,9 @@
         "requests": 19
       }
     ],
-    "resets_in_seconds": 39600,
-    "pace": 0.31138853503184716,
+    "resets_in_seconds": 21600,
+    "pace": 0.3017777777777778,
     "status": "good"
   },
-  "updated_at": 1791120558
+  "updated_at": 1791136012
 }

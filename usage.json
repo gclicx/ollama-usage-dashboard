@@ -9,7 +9,7 @@
   },
   "weekly": {
     "percent": 29.1,
-    "resets_in": "16 hours",
+    "resets_in": "11 hours",
     "models": [
       {
         "model": "gemma4:31b",
@@ -36,9 +36,9 @@
         "requests": 19
       }
     ],
-    "resets_in_seconds": 57600,
-    "pace": 0.32163157894736844,
+    "resets_in_seconds": 39600,
+    "pace": 0.31138853503184716,
     "status": "good"
   },
-  "updated_at": 1791099748
+  "updated_at": 1791120558
 }
